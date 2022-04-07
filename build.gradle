@@ -25,16 +25,43 @@ ext {
 }
 
 dependencies {
+    
+    // [FORNT_END]
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
+    // [DISTRIBUTED_SYSTEM] ZooKeeper	
+	implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-discovery'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // [CACHE] Redis  	
+  	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+  	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    
+    // [MSG_QUEUE] kafka
+  	implementation 'org.apache.kafka:kafka-streams'
+  	
+  	// [MICROSERVICE] spring-cloud
+  	implementation 'org.springframework.cloud:spring-cloud-stream'
+  	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'
+	implementation 'org.springframework.cloud:spring-cloud-config-server'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.cloud:spring-cloud-config-server'
+	
+	// [UNITILITY] lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	
+	// [RUNTIME] tomcat
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	
+	// [TESTING] spring-boot-starter-test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	
+	
 }
 
 dependencyManagement {
