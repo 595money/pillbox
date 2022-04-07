@@ -29,15 +29,17 @@ dependencies {
     // [FORNT_END]
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     
-    // [DISTRIBUTED_SYSTEM] ZooKeeper	
-	implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-config'
-    implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-discovery'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     
+    // [DISTRIBUTED_SYSTEM] ZooKeeper	
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-all'
+	
+   
     // [CACHE] Redis  	
   	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
   	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    
     
     // [MSG_QUEUE] kafka
   	implementation 'org.apache.kafka:kafka-streams'
