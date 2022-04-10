@@ -2,11 +2,17 @@ plugins {
 	id 'org.springframework.boot' version '3.0.0-M1'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
-	id 'war'
+	id 'application'
 }
 
-group = 'com.quinn'
+group = 'com.quinn.pillbox'
 version = '0.0.1-SNAPSHOT'
+
+application {
+	mainClass = 'com.quinn.pillbox.zoo.LeaderElection'
+}
+
+
 sourceCompatibility = '17'
 
 configurations {
