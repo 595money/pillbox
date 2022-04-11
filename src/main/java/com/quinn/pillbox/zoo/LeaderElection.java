@@ -18,6 +18,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
 
 /**
  * @ClassName: LeaderElection
@@ -31,7 +32,7 @@ public class LeaderElection implements Watcher {
 	private static final int SESSION_TIMEOUT = 3000;
 	private static final String ELECTION_NAMESPACE = "/election";
 	private ZooKeeper zooKeeper;
-	private String currenZodeName;
+	private String currentZodeName;
 
 	/**
 	 * @Title: volunteerForLeadership
@@ -53,31 +54,41 @@ public class LeaderElection implements Watcher {
 		String znodeFullPath = zooKeeper.create(znodePrefix, new byte[] {}, ZooDefs.Ids.OPEN_ACL_UNSAFE,
 				CreateMode.EPHEMERAL_SEQUENTIAL);
 		System.out.println("znode name" + znodeFullPath);
-		this.currenZodeName = znodeFullPath.replace(ELECTION_NAMESPACE + "/", "");
+		this.currentZodeName = znodeFullPath.replace(ELECTION_NAMESPACE + "/", "");
 	}
 
 	/**
-	 * @Title: electLeader
+	 * @Title: reelectLeader
 	 * @Description: 節點選舉演算法
 	 * @return void
 	 * @throws KeeperException
 	 * @throws InterruptedException
 	 */
-	public void electLeader() throws KeeperException, InterruptedException {
-		List<String> children = zooKeeper.getChildren(ELECTION_NAMESPACE, false);
+	public void reelectLeader() throws KeeperException, InterruptedException {
+		String predecessorName = "";
+		Stat predecessorStat = null;
+		while (predecessorStat == null) {
 
-		// 1. 對 children list 做 natural ordering
-		Collections.sort(children);
+			List<String> children = zooKeeper.getChildren(ELECTION_NAMESPACE, false);
 
-		// 2. 取得 "最小" 節點
-		String smallestChild = children.get(0);
+			// 1. 對 children list 做 natural ordering
+			Collections.sort(children);
 
-		// 3. 判斷自己是否為 "最小", 是則設定為 leader 節點, 若不是則依舊維持為一般節點
-		if (smallestChild.equals(currenZodeName)) {
-			System.out.println("I am the leader");
-			return;
+			// 2. 取得 "最小" 節點
+			String smallestChild = children.get(0);
+
+			// 3. 判斷自己是否為 "最小", 是則設定為 leader 節點, 若不是則依舊維持為一般節點
+			if (smallestChild.equals(currentZodeName)) {
+				System.out.println("I am the leader");
+				return;
+			} else {
+				// 當currentZode 不是 smallestChild 時, 代表 currentZode 前面一定還有 node
+				System.out.println("I am not the leader");
+				int predecessorIndex = Collections.binarySearch(children, currentZodeName) - 1;
+				predecessorName = children.get(predecessorIndex);
+				predecessorStat = zooKeeper.exists(ELECTION_NAMESPACE + "/" + predecessorName, this);
+			}
 		}
-		System.out.println("I am not the leader, " + smallestChild + " is the leader");
 	}
 
 	/*
@@ -101,8 +112,17 @@ public class LeaderElection implements Watcher {
 				}
 
 			}
-		default:
 			break;
+		case NodeDeleted:
+			try {
+				reelectLeader();
+			} catch (KeeperException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
