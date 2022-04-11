@@ -77,7 +77,7 @@ public class LeaderElection implements Watcher {
 			System.out.println("I am the leader");
 			return;
 		}
-		System.out.println("I am not the leader, " + smallestChild + "is the leader");
+		System.out.println("I am not the leader, " + smallestChild + " is the leader");
 	}
 
 	/*
@@ -101,6 +101,8 @@ public class LeaderElection implements Watcher {
 				}
 
 			}
+		default:
+			break;
 		}
 
 	}

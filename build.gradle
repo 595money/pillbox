@@ -63,7 +63,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	
 	// [RUNTIME] tomcat
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	// providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	
 	// [TESTING] spring-boot-starter-test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
