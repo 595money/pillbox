@@ -35,6 +35,17 @@ public class LeaderElection implements Watcher {
 	private String currentZodeName;
 
 	/**
+	 * @Title: connectToZookeeper
+	 * @Description: zKclient 與 zKServer 連線
+	 * @param @throws IOException 引數說明
+	 * @return void 返回型別
+	 * @throws
+	 */
+	public void connectToZookeeper() throws IOException {
+		this.zooKeeper = new ZooKeeper(ZOOKEEPER_ADDRESS, SESSION_TIMEOUT, this);
+	}
+
+	/**
 	 * @Title: volunteerForLeadership
 	 * @Description: 創建與初始化 znodes 於 tree
 	 * @throws KeeperException
@@ -58,13 +69,13 @@ public class LeaderElection implements Watcher {
 	}
 
 	/**
-	 * @Title: reelectLeader
+	 * @Title: reElectLeader
 	 * @Description: 節點選舉演算法
 	 * @return void
 	 * @throws KeeperException
 	 * @throws InterruptedException
 	 */
-	public void reelectLeader() throws KeeperException, InterruptedException {
+	public void reElectLeader() throws KeeperException, InterruptedException {
 		String predecessorName = "";
 		Stat predecessorStat = null;
 		while (predecessorStat == null) {
@@ -86,19 +97,27 @@ public class LeaderElection implements Watcher {
 				System.out.println("I am not the leader");
 				int predecessorIndex = Collections.binarySearch(children, currentZodeName) - 1;
 				predecessorName = children.get(predecessorIndex);
+
+				// 透過 zookeeper.exists() 將 watcher 設定為監視 predecessorNode
 				predecessorStat = zooKeeper.exists(ELECTION_NAMESPACE + "/" + predecessorName, this);
 			}
 		}
+
+		System.out.println("Watching zode " + predecessorName);
+		System.out.println();
+
 	}
 
-	/*
-	 * Title: process Description:
-	 * 
-	 * @param event
-	 * 
-	 * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
+	/**
+	 * @Title: process
+	 * @Description: 依照不同的狀態處理
+	 * @return void
+	 * @throws KeeperException
+	 * @throws InterruptedException
 	 */
+	@SuppressWarnings("incomplete-switch")
 	@Override
+	//
 	public void process(WatchedEvent event) {
 		// event trigger
 		switch (event.getType()) {
@@ -115,20 +134,27 @@ public class LeaderElection implements Watcher {
 			break;
 		case NodeDeleted:
 			try {
-				reelectLeader();
+				reElectLeader();
 			} catch (KeeperException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			break;
+		case NodeChildrenChanged: {
+			System.out.println("NodeChildrenChanged unsupported");
+			break;
+		}
+		case NodeCreated: {
+			System.out.println("NodeCreated unsupported");
+			break;
+		}
+		case NodeDataChanged: {
+			System.out.println("NodeDataChanged unsupported");
+			break;
+		}
 		}
 
-	}
-
-	public void connectToZookeeper() throws IOException {
-		this.zooKeeper = new ZooKeeper(ZOOKEEPER_ADDRESS, SESSION_TIMEOUT, this);
 	}
 
 	public void close() throws InterruptedException {
@@ -145,7 +171,7 @@ public class LeaderElection implements Watcher {
 		LeaderElection leaderElection = new LeaderElection();
 		leaderElection.connectToZookeeper();
 		leaderElection.volunteerForLeadership();
-		leaderElection.electLeader();
+		leaderElection.reElectLeader();
 		leaderElection.run();
 		leaderElection.close();
 		System.out.println("Disconnected from Zookeeper, exiting application");
