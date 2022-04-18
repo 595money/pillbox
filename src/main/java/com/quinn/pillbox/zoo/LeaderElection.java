@@ -20,6 +20,8 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
+import io.netty.util.internal.SystemPropertyUtil;
+
 /**
  * @ClassName: LeaderElection
  * @Description: 實作節點選舉
@@ -169,10 +171,20 @@ public class LeaderElection implements Watcher {
 
 	public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
 		LeaderElection leaderElection = new LeaderElection();
+		
+		//1. zookeeper client 連接 server
 		leaderElection.connectToZookeeper();
+		
+		//2. 創建znode
 		leaderElection.volunteerForLeadership();
+		
+		//3. 選舉(選出最小節點為leader, 將非leader節點的的watcher指向上//一節點)
 		leaderElection.reElectLeader();
+		
+		//4. 進入迴圈, 藉由事件監聽thread 來處理是否跳離迴圈
 		leaderElection.run();
+		
+		//5. 符合關閉條件的事件
 		leaderElection.close();
 		System.out.println("Disconnected from Zookeeper, exiting application");
 	}
