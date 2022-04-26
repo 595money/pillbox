@@ -2,7 +2,7 @@
 * @Title: WatchersDemo.java 
 * @Package com.quinn.pillbox.zoo 
 * @Description: TODO 
-* @author pigmilk
+* @author Quinn
 * @date Apr 11, 2022 9:43:46 PM 
 * @version 1.0.0   
 */
@@ -20,7 +20,7 @@ import org.apache.zookeeper.data.Stat;
 /**
  * @ClassName: WatchersDemo
  * @Description: TODO(這裡用一句話描述這個類的作用)
- * @author pigmilk
+ * @author Quinn
  * @date Apr 11, 2022 9:43:46 PM
  */
 

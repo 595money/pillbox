@@ -1,11 +1,3 @@
-/**   
-* @Title: LeaderElection.java 
-* @Package com.quinn.pillbox.zoo 
-* @Description: TODO 
-* @author pigmilk
-* @date Apr 8, 2022 6:18:30 AM 
-* @version 1.0.0   
-*/
 package com.quinn.pillbox.zoo;
 
 import java.io.IOException;
@@ -20,12 +12,9 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
-import io.netty.util.internal.SystemPropertyUtil;
-
 /**
- * @ClassName: LeaderElection
- * @Description: 實作節點選舉
- * @author pigmilk
+ * 實作節點選舉
+ * @author Quinn
  * @date Apr 8, 2022 6:18:30 AM
  */
 public class LeaderElection implements Watcher {
@@ -37,10 +26,8 @@ public class LeaderElection implements Watcher {
 	private String currentZodeName;
 
 	/**
-	 * @Title: connectToZookeeper
-	 * @Description: zKclient 與 zKServer 連線
-	 * @param @throws IOException 引數說明
-	 * @return void 返回型別
+	 * zKclient 與 zKServer 連線
+	 * @throws IOException
 	 * @throws
 	 */
 	public void connectToZookeeper() throws IOException {
