@@ -12,8 +12,11 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
+import com.quinn.pillbox.feature.OnElectionCallback;
+
 /**
  * 實作節點選舉
+ * 
  * @author Quinn
  * @date Apr 8, 2022 6:18:30 AM
  */
@@ -22,16 +25,14 @@ public class LeaderElection implements Watcher {
 	private static final String ZOOKEEPER_ADDRESS = "localhost:2181";
 	private static final int SESSION_TIMEOUT = 3000;
 	private static final String ELECTION_NAMESPACE = "/election";
-	private ZooKeeper zooKeeper;
+	private final ZooKeeper zooKeeper;
 	private String currentZodeName;
 
-	/**
-	 * zKclient 與 zKServer 連線
-	 * @throws IOException
-	 * @throws
-	 */
-	public void connectToZookeeper() throws IOException {
-		this.zooKeeper = new ZooKeeper(ZOOKEEPER_ADDRESS, SESSION_TIMEOUT, this);
+	private final OnElectionCallback onElectionCallBack;
+
+	public LeaderElection(ZooKeeper zooKeeper, OnElectionCallback onElectionCallback) {
+		this.zooKeeper = zooKeeper;
+		this.onElectionCallBack = onElectionCallback;
 	}
 
 	/**
@@ -80,6 +81,7 @@ public class LeaderElection implements Watcher {
 			// 3. 判斷自己是否為 "最小", 是則設定為 leader 節點, 若不是則依舊維持為一般節點
 			if (smallestChild.equals(currentZodeName)) {
 				System.out.println("I am the leader");
+				onElectionCallBack.onElectedToBeLeader();
 				return;
 			} else {
 				// 當currentZode 不是 smallestChild 時, 代表 currentZode 前面一定還有 node
@@ -91,7 +93,7 @@ public class LeaderElection implements Watcher {
 				predecessorStat = zooKeeper.exists(ELECTION_NAMESPACE + "/" + predecessorName, this);
 			}
 		}
-
+		onElectionCallBack.onWorker();
 		System.out.println("Watching zode " + predecessorName);
 		System.out.println();
 
@@ -157,23 +159,7 @@ public class LeaderElection implements Watcher {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
-		LeaderElection leaderElection = new LeaderElection();
-		
-		//1. zookeeper client 連接 server
-		leaderElection.connectToZookeeper();
-		
-		//2. 創建znode
-		leaderElection.volunteerForLeadership();
-		
-		//3. 選舉(選出最小節點為leader, 將非leader節點的的watcher指向上//一節點)
-		leaderElection.reElectLeader();
-		
-		//4. 進入迴圈, 藉由事件監聽thread 來處理是否跳離迴圈
-		leaderElection.run();
-		
-		//5. 符合關閉條件的事件
-		leaderElection.close();
-		System.out.println("Disconnected from Zookeeper, exiting application");
+	
 	}
 
 }
