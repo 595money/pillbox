@@ -45,23 +45,22 @@ public class ServiceRegistry implements Watcher {
 	 * 所以註冊中心儲存的節點共享資料 metadata 不可以太大量
 	 * 
 	 * @param metadata
+	 * @throws InterruptedException
+	 * @throws KeeperException
 	 */
-	public void registerToCluster(String metadata) {
-		try {
-			// 節點名稱為 /n_HOSTNAME, 透過 metadata 取得 address
-			this.currentZnode = zooKeeper.create(REGISTRY_ZNODE + "/n_", metadata.getBytes(),
-					ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+	public void registerToCluster(String metadata) throws KeeperException, InterruptedException {
 
-			System.out.println("Registered to service registry");
-		} catch (KeeperException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		// 節點名稱為 /n_HOSTNAME, 透過 metadata 取得 address
+		this.currentZnode = zooKeeper.create(REGISTRY_ZNODE + "/n_", metadata.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,
+				CreateMode.EPHEMERAL_SEQUENTIAL);
+
+		System.out.println("Registered to service registry");
+
 	}
 
 	/**
-	 * 服務註冊中心初始化後第一次 update 使用
+	 * 服務註冊中心初始化後第一次 update 時使用
+	 * <p>
 	 * 
 	 * @param 引數說明
 	 * @throws
@@ -85,6 +84,7 @@ public class ServiceRegistry implements Watcher {
 
 	/**
 	 * 服務註冊中心初始化時呼叫此方法來創建 ServiceRegistryZnode
+	 * <p>
 	 * 
 	 * @throws KeeperException
 	 * @throws InterruptedException
@@ -103,6 +103,7 @@ public class ServiceRegistry implements Watcher {
 
 	/**
 	 * 依據服務註冊中心 (service registry) 中節點的加入或移除來更新
+	 * <p>
 	 * 
 	 * @throws KeeperException
 	 * @throws InterruptedException
@@ -125,9 +126,13 @@ public class ServiceRegistry implements Watcher {
 	}
 
 	/**
-	 * 服務註冊中心移除節點的 address, <br>
-	 * 當節點脫離 cluster 或節點被選為領導時, <br>
-	 * 需要將此節點從 allServiceAddresses 中移除
+	 * 服務註冊中心移除公享資源中節點的 address
+	 * <p>
+	 * 當節點脫離 cluster 時將其從名單中移除, <br>
+	 * 當節點被選為 leader node 時, <br>
+	 * 亦需要將該節點從 allServiceAddresses 中移除,<br>
+	 * 已防止節點與自己進行 communication.
+	 * 
 	 * 
 	 * @throws InterruptedException
 	 * @throws KeeperException

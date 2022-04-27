@@ -25,9 +25,8 @@ public class LeaderElection implements Watcher {
 	private static final String ZOOKEEPER_ADDRESS = "localhost:2181";
 	private static final int SESSION_TIMEOUT = 3000;
 	private static final String ELECTION_NAMESPACE = "/election";
-	private final ZooKeeper zooKeeper;
 	private String currentZodeName;
-
+	private final ZooKeeper zooKeeper;
 	private final OnElectionCallback onElectionCallBack;
 
 	public LeaderElection(ZooKeeper zooKeeper, OnElectionCallback onElectionCallback) {
@@ -112,38 +111,12 @@ public class LeaderElection implements Watcher {
 	public void process(WatchedEvent event) {
 		// event trigger
 		switch (event.getType()) {
-		case None:
-			if (event.getState() == Event.KeeperState.SyncConnected) {
-				System.out.println("Sucessfully connected to Zookeeper");
-			} else {
-				synchronized (zooKeeper) {
-					System.out.println("Disconnected from Zookeeper event");
-					zooKeeper.notifyAll();
-				}
-
-			}
-			break;
 		case NodeDeleted:
 			try {
 				reElectLeader();
-			} catch (KeeperException e) {
-				e.printStackTrace();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} catch (KeeperException e) {
 			}
-			break;
-		case NodeChildrenChanged: {
-			System.out.println("NodeChildrenChanged unsupported");
-			break;
-		}
-		case NodeCreated: {
-			System.out.println("NodeCreated unsupported");
-			break;
-		}
-		case NodeDataChanged: {
-			System.out.println("NodeDataChanged unsupported");
-			break;
-		}
 		}
 
 	}
@@ -159,7 +132,7 @@ public class LeaderElection implements Watcher {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
-	
+
 	}
 
 }
