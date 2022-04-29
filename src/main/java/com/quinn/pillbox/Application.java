@@ -12,7 +12,7 @@ import com.quinn.pillbox.zoo.LeaderElection;
 import com.quinn.pillbox.zoo.management.ServiceRegistry;
 
 /**
- * @author pigmilk
+ * @author quinn
  * @date Apr 27, 2022 10:49:05 PM
  */
 
@@ -28,17 +28,17 @@ public class Application implements Watcher {
 		int currentServerPort = args.length == 1 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
 		Application app = new Application();
 
-		// 1. zookeeper client 連接 server
+		// 1. zookeeper client(localhost) 連接 server
 		ZooKeeper zooKeeper = app.connectToZookeeper();
-		
+
 		// 2. 初始化服務註冊中心 ServiceRegistry
 		ServiceRegistry serviceRegistry = new ServiceRegistry(zooKeeper);
-		OnElectionAction onElectionAction = new OnElectionAction(serviceRegistry, currentServerPort);
-		
-		// 3. 選舉演算法
-		LeaderElection leaderElection = new LeaderElection(zooKeeper, onElectionAction);
 
-		// 4. 創建znode
+		// 3. event driven
+		OnElectionAction onElectionAction = new OnElectionAction(serviceRegistry, currentServerPort);
+
+		// 4. 創建znode 及進行選舉
+		LeaderElection leaderElection = new LeaderElection(zooKeeper, onElectionAction);
 		leaderElection.volunteerForLeadership();
 
 		// 5. 進行選舉(選出最小節點為leader, 將非leader節點的的watcher指向上//一節點)
@@ -75,17 +75,17 @@ public class Application implements Watcher {
 	 * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
 	 */
 	@Override
-	    public void process(WatchedEvent event) {
-	        switch (event.getType()) {
-	            case None:
-	                if (event.getState() == Event.KeeperState.SyncConnected) {
-	                    System.out.println("Successfully connected to Zookeeper");
-	                } else {
-	                    synchronized (zooKeeper) {
-	                        System.out.println("Disconnected from Zookeeper event");
-	                        zooKeeper.notifyAll();
-	                    }
-	                }
-	        }
-	    }
+	public void process(WatchedEvent event) {
+		switch (event.getType()) {
+		case None:
+			if (event.getState() == Event.KeeperState.SyncConnected) {
+				System.out.println("Successfully connected to Zookeeper");
+			} else {
+				synchronized (zooKeeper) {
+					System.out.println("Disconnected from Zookeeper event");
+					zooKeeper.notifyAll();
+				}
+			}
+		}
+	}
 }

@@ -16,6 +16,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * Service Registry node
+ * <p>
  * 服務註冊中心相關處理的類別, 創建服務中心、管理服務中心相關事務
  * 
  * @author Quinn
